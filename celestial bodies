@@ -1,0 +1,605 @@
+camper: /project$ psql --username=freecodecamp --dbname=postgres
+Border style is 2.
+Pager usage is off.
+psql (12.17 (Ubuntu 12.17-1.pgdg22.04+1))
+SSL connection (protocol: TLSv1.3, cipher: TLS_AES_256_GCM_SHA384, bits: 256, compression: off)
+Type "help" for help.
+
+postgres=> CREATE DATABASE univers;
+CREATE DATABASE
+postgres=> CREATE DATABASE universe;
+CREATE DATABASE
+postgres=> \c universe;
+SSL connection (protocol: TLSv1.3, cipher: TLS_AES_256_GCM_SHA384, bits: 256, compression: off)
+You are now connected to database "universe" as user "freecodecamp".
+universe=> CREATE TABLE galaxy(galaxy_id SERIAL PRIMARY KEY NOT NULL, speed INT, description TEXT);
+CREATE TABLE
+universe=> \d
+                     List of relations
++--------+----------------------+----------+--------------+
+| Schema |         Name         |   Type   |    Owner     |
++--------+----------------------+----------+--------------+
+| public | galaxy               | table    | freecodecamp |
+| public | galaxy_galaxy_id_seq | sequence | freecodecamp |
++--------+----------------------+----------+--------------+
+(2 rows)
+
+universe=> \d galaxy_id
+Did not find any relation named "galaxy_id".
+universe=> \d galaxy
+                                   Table "public.galaxy"
++-------------+---------+-----------+----------+-------------------------------------------+
+|   Column    |  Type   | Collation | Nullable |                  Default                  |
++-------------+---------+-----------+----------+-------------------------------------------+
+| galaxy_id   | integer |           | not null | nextval('galaxy_galaxy_id_seq'::regclass) |
+| speed       | integer |           |          |                                           |
+| description | text    |           |          |                                           |
++-------------+---------+-----------+----------+-------------------------------------------+
+Indexes:
+    "galaxy_pkey" PRIMARY KEY, btree (galaxy_id)
+
+universe=> CREATE TABLE star(star_id SERIAL PRIMARY KEY NOT NULL, radius INT NOT NULL, color VARCHAR(255) NOT NULL, name  VARCHAR(255) NOT NULL, galaxy_id INT,  CONSTRAINT fk_galaxy FOREIGN KEY(galaxy_id) REFERENCES galaxy(galaxy_id));
+CREATE TABLE
+universe=> \d star
+                                         Table "public.star"
++-----------+------------------------+-----------+----------+---------------------------------------+
+|  Column   |          Type          | Collation | Nullable |                Default                |
++-----------+------------------------+-----------+----------+---------------------------------------+
+| star_id   | integer                |           | not null | nextval('star_star_id_seq'::regclass) |
+| radius    | integer                |           | not null |                                       |
+| color     | character varying(255) |           | not null |                                       |
+| name      | character varying(255) |           | not null |                                       |
+| galaxy_id | integer                |           |          |                                       |
++-----------+------------------------+-----------+----------+---------------------------------------+
+Indexes:
+    "star_pkey" PRIMARY KEY, btree (star_id)
+Foreign-key constraints:
+    "fk_galaxy" FOREIGN KEY (galaxy_id) REFERENCES galaxy(galaxy_id)
+
+universe=> ALTER TABLE galaxy ADD COLUMN name VARCHAR(255) NOT NULL;
+ALTER TABLE
+universe=> \d galaxy;
+                                           Table "public.galaxy"
++-------------+------------------------+-----------+----------+-------------------------------------------+
+|   Column    |          Type          | Collation | Nullable |                  Default                  |
++-------------+------------------------+-----------+----------+-------------------------------------------+
+| galaxy_id   | integer                |           | not null | nextval('galaxy_galaxy_id_seq'::regclass) |
+| speed       | integer                |           |          |                                           |
+| description | text                   |           |          |                                           |
+| name        | character varying(255) |           | not null |                                           |
++-------------+------------------------+-----------+----------+-------------------------------------------+
+Indexes:
+    "galaxy_pkey" PRIMARY KEY, btree (galaxy_id)
+Referenced by:
+    TABLE "star" CONSTRAINT "fk_galaxy" FOREIGN KEY (galaxy_id) REFERENCES galaxy(galaxy_id)
+
+universe=> CREATE TABLE planet(planet_id SERIAL PRIMARY KEY NOT NULL, name VARCHAR(255) NOT NULL, amount_of_people NUMERIC, time_travel boolean DEFAULT(false) NOT NULL, star_id INT NOT NULL, CONSTRAINT fk_star FOREIGN KEY(star_id) REFERENCES star(star_id
+));
+CREATE TABLE
+universe=> \d planet
+                                             Table "public.planet"
++------------------+------------------------+-----------+----------+-------------------------------------------+
+|      Column      |          Type          | Collation | Nullable |                  Default                  |
++------------------+------------------------+-----------+----------+-------------------------------------------+
+| planet_id        | integer                |           | not null | nextval('planet_planet_id_seq'::regclass) |
+| name             | character varying(255) |           | not null |                                           |
+| amount_of_people | numeric                |           |          |                                           |
+| time_travel      | boolean                |           | not null | false                                     |
+| star_id          | integer                |           | not null |                                           |
++------------------+------------------------+-----------+----------+-------------------------------------------+
+Indexes:
+    "planet_pkey" PRIMARY KEY, btree (planet_id)
+Foreign-key constraints:
+    "fk_star" FOREIGN KEY (star_id) REFERENCES star(star_id)
+
+universe=> CREATE TABLE moon(moon_id SERIAL PRIMAY KEY NOT NULL, name VARCHAR(255) NOT NULL, name_code VARCHAR(255) UNIQUE, has_water boolean NOT NULL, planet_id INT NOT NULL, CONSTRAINT fk_planet FOREIGN KEY(planet_id) REFERENCES planet(planet_id));
+ERROR:  syntax error at or near "PRIMAY"
+LINE 1: CREATE TABLE moon(moon_id SERIAL PRIMAY KEY NOT NULL, name V...
+                                         ^
+universe=> CREATE TABLE moon(moon_id SERIAL PRIMARY KEY NOT NULL, name VARCHAR(255) NOT NULL, name_code VARCHAR(255) UNIQUE, ha
+s_water boolean NOT NULL, planet_id INT NOT NULL, CONSTRAINT fk_planet FOREIGN KEY(planet_id) REFERENCES planet(planet_id));
+CREATE TABLE
+universe=> \d moon;
+                                         Table "public.moon"
++-----------+------------------------+-----------+----------+---------------------------------------+
+|  Column   |          Type          | Collation | Nullable |                Default                |
++-----------+------------------------+-----------+----------+---------------------------------------+
+| moon_id   | integer                |           | not null | nextval('moon_moon_id_seq'::regclass) |
+| name      | character varying(255) |           | not null |                                       |
+| name_code | character varying(255) |           |          |                                       |
+| has_water | boolean                |           | not null |                                       |
+| planet_id | integer                |           | not null |                                       |
++-----------+------------------------+-----------+----------+---------------------------------------+
+Indexes:
+    "moon_pkey" PRIMARY KEY, btree (moon_id)
+    "moon_name_code_key" UNIQUE CONSTRAINT, btree (name_code)
+Foreign-key constraints:
+    "fk_planet" FOREIGN KEY (planet_id) REFERENCES planet(planet_id)
+
+universe=> ALTER TABLE moon DROP COLUMN name_code;
+ALTER TABLE
+universe=> ALTER TABLE moon ADD COLUMN name_code VARCHAR(255) UNIQUE NOT NULL;
+ALTER TABLE
+universe=> \d moon;
+                                         Table "public.moon"
++-----------+------------------------+-----------+----------+---------------------------------------+
+|  Column   |          Type          | Collation | Nullable |                Default                |
++-----------+------------------------+-----------+----------+---------------------------------------+
+| moon_id   | integer                |           | not null | nextval('moon_moon_id_seq'::regclass) |
+| name      | character varying(255) |           | not null |                                       |
+| has_water | boolean                |           | not null |                                       |
+| planet_id | integer                |           | not null |                                       |
+| name_code | character varying(255) |           | not null |                                       |
++-----------+------------------------+-----------+----------+---------------------------------------+
+Indexes:
+    "moon_pkey" PRIMARY KEY, btree (moon_id)
+    "moon_name_code_key" UNIQUE CONSTRAINT, btree (name_code)
+Foreign-key constraints:
+    "fk_planet" FOREIGN KEY (planet_id) REFERENCES planet(planet_id)
+
+universe=> CREATE TABLE blackhole(blackhole_id SERIAL PRIMARY KEY NOT NULL, gravity INT, galaxy_id INT, wormhole BOOLEAN DEFAULT(false) NOT NULL);
+CREATE TABLE
+universe=> \d
+                        List of relations
++--------+----------------------------+----------+--------------+
+| Schema |            Name            |   Type   |    Owner     |
++--------+----------------------------+----------+--------------+
+| public | blackhole                  | table    | freecodecamp |
+| public | blackhole_blackhole_id_seq | sequence | freecodecamp |
+| public | galaxy                     | table    | freecodecamp |
+| public | galaxy_galaxy_id_seq       | sequence | freecodecamp |
+| public | moon                       | table    | freecodecamp |
+| public | moon_moon_id_seq           | sequence | freecodecamp |
+| public | planet                     | table    | freecodecamp |
+| public | planet_planet_id_seq       | sequence | freecodecamp |
+| public | star                       | table    | freecodecamp |
+| public | star_star_id_seq           | sequence | freecodecamp |
++--------+----------------------------+----------+--------------+
+(10 rows)
+
+universe=> \d galaxy
+                                           Table "public.galaxy"
++-------------+------------------------+-----------+----------+-------------------------------------------+
+|   Column    |          Type          | Collation | Nullable |                  Default                  |
++-------------+------------------------+-----------+----------+-------------------------------------------+
+| galaxy_id   | integer                |           | not null | nextval('galaxy_galaxy_id_seq'::regclass) |
+| speed       | integer                |           |          |                                           |
+| description | text                   |           |          |                                           |
+| name        | character varying(255) |           | not null |                                           |
++-------------+------------------------+-----------+----------+-------------------------------------------+
+Indexes:
+    "galaxy_pkey" PRIMARY KEY, btree (galaxy_id)
+Referenced by:
+    TABLE "star" CONSTRAINT "fk_galaxy" FOREIGN KEY (galaxy_id) REFERENCES galaxy(galaxy_id)
+
+universe=> INSERT INTO galaxy(name) VALUES('andromeda');
+INSERT 0 1
+universe=> SELECT * FROM galaxy;
++-----------+-------+-------------+-----------+
+| galaxy_id | speed | description |   name    |
++-----------+-------+-------------+-----------+
+|         1 |       |             | andromeda |
++-----------+-------+-------------+-----------+
+(1 row)
+
+universe=> INSERT INTO galaxy(name) VALUES('galaxy2');
+INSERT 0 1
+universe=> INSERT INTO galaxy(name) VALUES('galaxy3');
+INSERT 0 1
+universe=> INSERT INTO galaxy(name) VALUES('galaxy4');
+INSERT 0 1
+universe=> INSERT INTO galaxy(name) VALUES('galaxy4');
+INSERT 0 1
+universe=> SELECT * FROM galaxy;
++-----------+-------+-------------+-----------+
+| galaxy_id | speed | description |   name    |
++-----------+-------+-------------+-----------+
+|         1 |       |             | andromeda |
+|         2 |       |             | galaxy2   |
+|         3 |       |             | galaxy3   |
+|         4 |       |             | galaxy4   |
+|         5 |       |             | galaxy4   |
++-----------+-------+-------------+-----------+
+(5 rows)
+
+universe=> DELETE FROM galaxy WHERE name='galaxy4';
+DELETE 2
+universe=> SELECT * FROM galaxy;
++-----------+-------+-------------+-----------+
+| galaxy_id | speed | description |   name    |
++-----------+-------+-------------+-----------+
+|         1 |       |             | andromeda |
+|         2 |       |             | galaxy2   |
+|         3 |       |             | galaxy3   |
++-----------+-------+-------------+-----------+
+(3 rows)
+
+universe=> INSERT INTO galaxy(name) VALUES('galaxy4');
+INSERT 0 1
+universe=> INSERT INTO galaxy(name) VALUES('galaxy5');
+INSERT 0 1
+universe=> INSERT INTO galaxy(name) VALUES('galaxy6');
+INSERT 0 1
+universe=> SELECT * FROM galaxy;
++-----------+-------+-------------+-----------+
+| galaxy_id | speed | description |   name    |
++-----------+-------+-------------+-----------+
+|         1 |       |             | andromeda |
+|         2 |       |             | galaxy2   |
+|         3 |       |             | galaxy3   |
+|         6 |       |             | galaxy4   |
+|         7 |       |             | galaxy5   |
+|         8 |       |             | galaxy6   |
++-----------+-------+-------------+-----------+
+(6 rows)
+
+universe=> \d star
+                                         Table "public.star"
++-----------+------------------------+-----------+----------+---------------------------------------+
+|  Column   |          Type          | Collation | Nullable |                Default                |
++-----------+------------------------+-----------+----------+---------------------------------------+
+| star_id   | integer                |           | not null | nextval('star_star_id_seq'::regclass) |
+| radius    | integer                |           | not null |                                       |
+| color     | character varying(255) |           | not null |                                       |
+| name      | character varying(255) |           | not null |                                       |
+| galaxy_id | integer                |           |          |                                       |
++-----------+------------------------+-----------+----------+---------------------------------------+
+Indexes:
+    "star_pkey" PRIMARY KEY, btree (star_id)
+Foreign-key constraints:
+    "fk_galaxy" FOREIGN KEY (galaxy_id) REFERENCES galaxy(galaxy_id)
+Referenced by:
+    TABLE "planet" CONSTRAINT "fk_star" FOREIGN KEY (star_id) REFERENCES star(star_id)
+
+universe=> INSERT INTO star(radius, color, name, galaxy_id) VALUES(123461234, 'red', 'beatlejuice', 1);
+INSERT 0 1
+universe=> SELECT * FROM star;
++---------+-----------+-------+-------------+-----------+
+| star_id |  radius   | color |    name     | galaxy_id |
++---------+-----------+-------+-------------+-----------+
+|       1 | 123461234 | red   | beatlejuice |         1 |
++---------+-----------+-------+-------------+-----------+
+(1 row)
+
+universe=> INSERT INTO star(radius, color, name, galaxy_id) VALUES(123461234, 'yellow', 'joe', 1);
+INSERT 0 1
+universe=> INSERT INTO star(radius, color, name, galaxy_id) VALUES(123461234, 'yellow', 'gary', 1);
+INSERT 0 1
+universe=> INSERT INTO star(radius, color, name, galaxy_id) VALUES(123461234, 'yellow', 'big yellow', 1);
+INSERT 0 1
+universe=> INSERT INTO star(radius, color, name, galaxy_id) VALUES(123461234, 'orange', 'small orange', 1);
+INSERT 0 1
+universe=> INSERT INTO star(radius, color, name, galaxy_id) VALUES(123461234, 'orange', 'star in galaxy', 2);
+INSERT 0 1
+universe=> SELECT 8 FROM star;
++----------+
+| ?column? |
++----------+
+|        8 |
+|        8 |
+|        8 |
+|        8 |
+|        8 |
+|        8 |
++----------+
+(6 rows)
+
+universe=> SELECT * FROM star;
++---------+-----------+--------+----------------+-----------+
+| star_id |  radius   | color  |      name      | galaxy_id |
++---------+-----------+--------+----------------+-----------+
+|       1 | 123461234 | red    | beatlejuice    |         1 |
+|       2 | 123461234 | yellow | joe            |         1 |
+|       3 | 123461234 | yellow | gary           |         1 |
+|       4 | 123461234 | yellow | big yellow     |         1 |
+|       5 | 123461234 | orange | small orange   |         1 |
+|       6 | 123461234 | orange | star in galaxy |         2 |
++---------+-----------+--------+----------------+-----------+
+(6 rows)
+
+universe=> \d planet
+                                             Table "public.planet"
++------------------+------------------------+-----------+----------+-------------------------------------------+
+|      Column      |          Type          | Collation | Nullable |                  Default                  |
++------------------+------------------------+-----------+----------+-------------------------------------------+
+| planet_id        | integer                |           | not null | nextval('planet_planet_id_seq'::regclass) |
+| name             | character varying(255) |           | not null |                                           |
+| amount_of_people | numeric                |           |          |                                           |
+| time_travel      | boolean                |           | not null | false                                     |
+| star_id          | integer                |           | not null |                                           |
++------------------+------------------------+-----------+----------+-------------------------------------------+
+Indexes:
+    "planet_pkey" PRIMARY KEY, btree (planet_id)
+Foreign-key constraints:
+    "fk_star" FOREIGN KEY (star_id) REFERENCES star(star_id)
+Referenced by:
+    TABLE "moon" CONSTRAINT "fk_planet" FOREIGN KEY (planet_id) REFERENCES planet(planet_id)
+
+universe=> INSERT INTO planet(name, star_id) VALUES ('earth', 1);
+INSERT 0 1
+universe=> INSERT INTO planet(name, star_id) VALUES ('mars', 1);
+INSERT 0 1
+universe=> INSERT INTO planet(name, star_id) VALUES ('neptune', 1);
+INSERT 0 1
+universe=> INSERT INTO planet(name, star_id) VALUES ('jupiter', 1);
+INSERT 0 1
+universe=> INSERT INTO planet(name, star_id) VALUES ('unarnus', 1);
+INSERT 0 1
+universe=> INSERT INTO planet(name, star_id) VALUES ('venus', 1);
+INSERT 0 1
+universe=> INSERT INTO planet(name, star_id) VALUES ('mercury', 1);
+INSERT 0 1
+universe=> INSERT INTO planet(name, star_id) VALUES ('saturn', 1);
+INSERT 0 1
+universe=> INSERT INTO planet(name, star_id) VALUES ('pluto', 1);
+INSERT 0 1
+universe=> INSERT INTO planet(name, star_id) VALUES ('yolo', 1);
+INSERT 0 1
+universe=> INSERT INTO planet(name, star_id) VALUES ('jalala', 2);
+INSERT 0 1
+universe=> INSERT INTO planet(name, star_id) VALUES ('malala', 2);
+INSERT 0 1
+universe=> INSERT INTO planet(name, star_id) VALUES ('kento', 3);
+INSERT 0 1
+universe=> SELECT * FROM planet;
++-----------+---------+------------------+-------------+---------+
+| planet_id |  name   | amount_of_people | time_travel | star_id |
++-----------+---------+------------------+-------------+---------+
+|         1 | earth   |                  | f           |       1 |
+|         2 | mars    |                  | f           |       1 |
+|         3 | neptune |                  | f           |       1 |
+|         4 | jupiter |                  | f           |       1 |
+|         5 | unarnus |                  | f           |       1 |
+|         6 | venus   |                  | f           |       1 |
+|         7 | mercury |                  | f           |       1 |
+|         8 | saturn  |                  | f           |       1 |
+|         9 | pluto   |                  | f           |       1 |
+|        10 | yolo    |                  | f           |       1 |
+|        11 | jalala  |                  | f           |       2 |
+|        12 | malala  |                  | f           |       2 |
+|        13 | kento   |                  | f           |       3 |
++-----------+---------+------------------+-------------+---------+
+(13 rows)
+
+universe=> \d moon;
+                                         Table "public.moon"
++-----------+------------------------+-----------+----------+---------------------------------------+
+|  Column   |          Type          | Collation | Nullable |                Default                |
++-----------+------------------------+-----------+----------+---------------------------------------+
+| moon_id   | integer                |           | not null | nextval('moon_moon_id_seq'::regclass) |
+| name      | character varying(255) |           | not null |                                       |
+| has_water | boolean                |           | not null |                                       |
+| planet_id | integer                |           | not null |                                       |
+| name_code | character varying(255) |           | not null |                                       |
++-----------+------------------------+-----------+----------+---------------------------------------+
+Indexes:
+    "moon_pkey" PRIMARY KEY, btree (moon_id)
+    "moon_name_code_key" UNIQUE CONSTRAINT, btree (name_code)
+Foreign-key constraints:
+    "fk_planet" FOREIGN KEY (planet_id) REFERENCES planet(planet_id)
+
+universe=> INSERT INTO moon(name, has_water, planet_id, name_code) VALUES ('moon1', true, 2, 'moon1');
+INSERT 0 1
+universe=> INSERT INTO moon(name, has_water, planet_id, name_code) VALUES ('moon2', true, 3, 'moon2');
+INSERT 0 1
+universe=> INSERT INTO moon(name, has_water, planet_id, name_code) VALUES ('moon3', true, 4, 'moon3');
+INSERT 0 1
+universe=> INSERT INTO moon(name, has_water, planet_id, name_code) VALUES ('moon3', true, 4, 'moon4');
+INSERT 0 1
+universe=> INSERT INTO moon(name, has_water, planet_id, name_code) VALUES ('moon3', true, 4, 'moon5');
+INSERT 0 1
+universe=> INSERT INTO moon(name, has_water, planet_id, name_code) VALUES ('moon3', true, 4, 'moon6');
+INSERT 0 1
+universe=> INSERT INTO moon(name, has_water, planet_id, name_code) VALUES ('moon3', true, 4, 'moon7');
+INSERT 0 1
+universe=> INSERT INTO moon(name, has_water, planet_id, name_code) VALUES ('moon3', true, 4, 'moon8');
+INSERT 0 1
+universe=> INSERT INTO moon(name, has_water, planet_id, name_code) VALUES ('moon3', true, 4, 'moon9');
+INSERT 0 1
+universe=> INSERT INTO moon(name, has_water, planet_id, name_code) VALUES ('moon3', true, 4, 'moon10');
+INSERT 0 1
+universe=> INSERT INTO moon(name, has_water, planet_id, name_code) VALUES ('moon3', true, 4, 'moon12');
+INSERT 0 1
+universe=> INSERT INTO moon(name, has_water, planet_id, name_code) VALUES ('moon3', true, 4, 'moon11');
+INSERT 0 1
+universe=> INSERT INTO moon(name, has_water, planet_id, name_code) VALUES ('moon3', true, 4, 'moon13');
+INSERT 0 1
+universe=> INSERT INTO moon(name, has_water, planet_id, name_code) VALUES ('moon3', true, 4, 'moon14');
+INSERT 0 1
+universe=> INSERT INTO moon(name, has_water, planet_id, name_code) VALUES ('moon3', true, 4, 'moon15');
+INSERT 0 1
+universe=> INSERT INTO moon(name, has_water, planet_id, name_code) VALUES ('moon3', true, 4, 'moon16');
+INSERT 0 1
+universe=> INSERT INTO moon(name, has_water, planet_id, name_code) VALUES ('moon3', true, 4, 'moon17');
+INSERT 0 1
+universe=> INSERT INTO moon(name, has_water, planet_id, name_code) VALUES ('moon3', true, 4, 'moon18');
+INSERT 0 1
+universe=> INSERT INTO moon(name, has_water, planet_id, name_code) VALUES ('moon3', true, 4, 'moon19');
+INSERT 0 1
+universe=> INSERT INTO moon(name, has_water, planet_id, name_code) VALUES ('moon3', true, 4, 'moon20');
+INSERT 0 1
+universe=> SELECT * FROM moon;
++---------+-------+-----------+-----------+-----------+
+| moon_id | name  | has_water | planet_id | name_code |
++---------+-------+-----------+-----------+-----------+
+|       1 | moon1 | t         |         2 | moon1     |
+|       2 | moon2 | t         |         3 | moon2     |
+|       3 | moon3 | t         |         4 | moon3     |
+|       4 | moon3 | t         |         4 | moon4     |
+|       5 | moon3 | t         |         4 | moon5     |
+|       6 | moon3 | t         |         4 | moon6     |
+|       7 | moon3 | t         |         4 | moon7     |
+|       8 | moon3 | t         |         4 | moon8     |
+|       9 | moon3 | t         |         4 | moon9     |
+|      10 | moon3 | t         |         4 | moon10    |
+|      11 | moon3 | t         |         4 | moon12    |
+|      12 | moon3 | t         |         4 | moon11    |
+|      13 | moon3 | t         |         4 | moon13    |
+|      14 | moon3 | t         |         4 | moon14    |
+|      15 | moon3 | t         |         4 | moon15    |
+|      16 | moon3 | t         |         4 | moon16    |
+|      17 | moon3 | t         |         4 | moon17    |
+|      18 | moon3 | t         |         4 | moon18    |
+|      19 | moon3 | t         |         4 | moon19    |
+|      20 | moon3 | t         |         4 | moon20    |
++---------+-------+-----------+-----------+-----------+
+(20 rows)
+
+universe=> \d galaxy
+                                           Table "public.galaxy"
++-------------+------------------------+-----------+----------+-------------------------------------------+
+|   Column    |          Type          | Collation | Nullable |                  Default                  |
++-------------+------------------------+-----------+----------+-------------------------------------------+
+| galaxy_id   | integer                |           | not null | nextval('galaxy_galaxy_id_seq'::regclass) |
+| speed       | integer                |           |          |                                           |
+| description | text                   |           |          |                                           |
+| name        | character varying(255) |           | not null |                                           |
++-------------+------------------------+-----------+----------+-------------------------------------------+
+Indexes:
+    "galaxy_pkey" PRIMARY KEY, btree (galaxy_id)
+Referenced by:
+    TABLE "star" CONSTRAINT "fk_galaxy" FOREIGN KEY (galaxy_id) REFERENCES galaxy(galaxy_id)
+
+universe=> ALTER TABLE galaxy ADD COLUMN rotation_speed INT NOT NULL DEFAULT(100000);
+ALTER TABLE
+universe=> SELECT * FROM galaxy;
++-----------+-------+-------------+-----------+----------------+
+| galaxy_id | speed | description |   name    | rotation_speed |
++-----------+-------+-------------+-----------+----------------+
+|         1 |       |             | andromeda |         100000 |
+|         2 |       |             | galaxy2   |         100000 |
+|         3 |       |             | galaxy3   |         100000 |
+|         6 |       |             | galaxy4   |         100000 |
+|         7 |       |             | galaxy5   |         100000 |
+|         8 |       |             | galaxy6   |         100000 |
++-----------+-------+-------------+-----------+----------------+
+(6 rows)
+
+universe=> \d star;
+                                         Table "public.star"
++-----------+------------------------+-----------+----------+---------------------------------------+
+|  Column   |          Type          | Collation | Nullable |                Default                |
++-----------+------------------------+-----------+----------+---------------------------------------+
+| star_id   | integer                |           | not null | nextval('star_star_id_seq'::regclass) |
+| radius    | integer                |           | not null |                                       |
+| color     | character varying(255) |           | not null |                                       |
+| name      | character varying(255) |           | not null |                                       |
+| galaxy_id | integer                |           |          |                                       |
++-----------+------------------------+-----------+----------+---------------------------------------+
+Indexes:
+    "star_pkey" PRIMARY KEY, btree (star_id)
+Foreign-key constraints:
+    "fk_galaxy" FOREIGN KEY (galaxy_id) REFERENCES galaxy(galaxy_id)
+Referenced by:
+    TABLE "planet" CONSTRAINT "fk_star" FOREIGN KEY (star_id) REFERENCES star(star_id)
+
+universe=> \d planet
+                                             Table "public.planet"
++------------------+------------------------+-----------+----------+-------------------------------------------+
+|      Column      |          Type          | Collation | Nullable |                  Default                  |
++------------------+------------------------+-----------+----------+-------------------------------------------+
+| planet_id        | integer                |           | not null | nextval('planet_planet_id_seq'::regclass) |
+| name             | character varying(255) |           | not null |                                           |
+| amount_of_people | numeric                |           |          |                                           |
+| time_travel      | boolean                |           | not null | false                                     |
+| star_id          | integer                |           | not null |                                           |
++------------------+------------------------+-----------+----------+-------------------------------------------+
+Indexes:
+    "planet_pkey" PRIMARY KEY, btree (planet_id)
+Foreign-key constraints:
+    "fk_star" FOREIGN KEY (star_id) REFERENCES star(star_id)
+Referenced by:
+    TABLE "moon" CONSTRAINT "fk_planet" FOREIGN KEY (planet_id) REFERENCES planet(planet_id)
+
+universe=> \d moon;
+                                         Table "public.moon"
++-----------+------------------------+-----------+----------+---------------------------------------+
+|  Column   |          Type          | Collation | Nullable |                Default                |
++-----------+------------------------+-----------+----------+---------------------------------------+
+| moon_id   | integer                |           | not null | nextval('moon_moon_id_seq'::regclass) |
+| name      | character varying(255) |           | not null |                                       |
+| has_water | boolean                |           | not null |                                       |
+| planet_id | integer                |           | not null |                                       |
+| name_code | character varying(255) |           | not null |                                       |
++-----------+------------------------+-----------+----------+---------------------------------------+
+Indexes:
+    "moon_pkey" PRIMARY KEY, btree (moon_id)
+    "moon_name_code_key" UNIQUE CONSTRAINT, btree (name_code)
+Foreign-key constraints:
+    "fk_planet" FOREIGN KEY (planet_id) REFERENCES planet(planet_id)
+
+universe=> \d blackhole
+                                     Table "public.blackhole"
++--------------+---------+-----------+----------+-------------------------------------------------+
+|    Column    |  Type   | Collation | Nullable |                     Default                     |
++--------------+---------+-----------+----------+-------------------------------------------------+
+| blackhole_id | integer |           | not null | nextval('blackhole_blackhole_id_seq'::regclass) |
+| gravity      | integer |           |          |                                                 |
+| galaxy_id    | integer |           |          |                                                 |
+| wormhole     | boolean |           | not null | false                                           |
++--------------+---------+-----------+----------+-------------------------------------------------+
+Indexes:
+    "blackhole_pkey" PRIMARY KEY, btree (blackhole_id)
+
+universe=> ALTER TABLE blackhole ADD COLUMN name VARCHAR(255) NOT NULL UNIQUE;
+ALTER TABLE
+universe=> \d blackhole
+                                             Table "public.blackhole"
++--------------+------------------------+-----------+----------+-------------------------------------------------+
+|    Column    |          Type          | Collation | Nullable |                     Default                     |
++--------------+------------------------+-----------+----------+-------------------------------------------------+
+| blackhole_id | integer                |           | not null | nextval('blackhole_blackhole_id_seq'::regclass) |
+| gravity      | integer                |           |          |                                                 |
+| galaxy_id    | integer                |           |          |                                                 |
+| wormhole     | boolean                |           | not null | false                                           |
+| name         | character varying(255) |           | not null |                                                 |
++--------------+------------------------+-----------+----------+-------------------------------------------------+
+Indexes:
+    "blackhole_pkey" PRIMARY KEY, btree (blackhole_id)
+    "blackhole_name_key" UNIQUE CONSTRAINT, btree (name)
+
+universe=> INSERT INTO blackhole(name) VALUES ('bh1');
+INSERT 0 1
+universe=> INSERT INTO blackhole(name) VALUES ('bh2');
+INSERT 0 1
+universe=> INSERT INTO blackhole(name) VALUES ('bh3');
+INSERT 0 1
+universe=> \d galaxy
+                                            Table "public.galaxy"
++----------------+------------------------+-----------+----------+-------------------------------------------+
+|     Column     |          Type          | Collation | Nullable |                  Default                  |
++----------------+------------------------+-----------+----------+-------------------------------------------+
+| galaxy_id      | integer                |           | not null | nextval('galaxy_galaxy_id_seq'::regclass) |
+| speed          | integer                |           |          |                                           |
+| description    | text                   |           |          |                                           |
+| name           | character varying(255) |           | not null |                                           |
+| rotation_speed | integer                |           | not null | 100000                                    |
++----------------+------------------------+-----------+----------+-------------------------------------------+
+Indexes:
+    "galaxy_pkey" PRIMARY KEY, btree (galaxy_id)
+Referenced by:
+    TABLE "star" CONSTRAINT "fk_galaxy" FOREIGN KEY (galaxy_id) REFERENCES galaxy(galaxy_id)
+
+universe=> ALTER TABLE galaxy ADD CONSTRAINT name_unique UNIQUE (name);
+ALTER TABLE
+universe=> \d galaxy
+                                            Table "public.galaxy"
++----------------+------------------------+-----------+----------+-------------------------------------------+
+|     Column     |          Type          | Collation | Nullable |                  Default                  |
++----------------+------------------------+-----------+----------+-------------------------------------------+
+| galaxy_id      | integer                |           | not null | nextval('galaxy_galaxy_id_seq'::regclass) |
+| speed          | integer                |           |          |                                           |
+| description    | text                   |           |          |                                           |
+| name           | character varying(255) |           | not null |                                           |
+| rotation_speed | integer                |           | not null | 100000                                    |
++----------------+------------------------+-----------+----------+-------------------------------------------+
+Indexes:
+    "galaxy_pkey" PRIMARY KEY, btree (galaxy_id)
+    "name_unique" UNIQUE CONSTRAINT, btree (name)
+Referenced by:
+    TABLE "star" CONSTRAINT "fk_galaxy" FOREIGN KEY (galaxy_id) REFERENCES galaxy(galaxy_id)
+
+universe=> ALTER TABLE star ADD CONSTRAINT name_unique_star UNIQUE (name);
+ALTER TABLE
+universe=> ALTER TABLE planet ADD CONSTRAINT name_unique_planet UNIQUE (name);
+ALTER TABLE
